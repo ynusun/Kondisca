@@ -320,6 +320,7 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
     const [newPassword, setNewPassword] = useState<string | null>(null);
     const [loadingCredentials, setLoadingCredentials] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showCredentialsAccordion, setShowCredentialsAccordion] = useState(false);
     
     // Giriş bilgilerini yükle
     useEffect(() => {
@@ -420,73 +421,86 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
     return (
         <Modal onClose={onClose} title="Oyuncu Bilgilerini Düzenle">
             <div className="space-y-6">
-                {/* Giriş Bilgileri Bölümü */}
-                <div className="bg-background border border-gray-700 p-4 rounded-lg">
-                    <h4 className="text-lg font-semibold text-text-light mb-3">🔐 Giriş Bilgileri</h4>
-                    {loadingCredentials ? (
-                        <p className="text-text-dark">Giriş bilgileri yükleniyor...</p>
-                    ) : credentials ? (
-                        <div className="space-y-3">
-                            <div>
-                                <label className="block text-sm font-medium text-text-dark mb-1">Email:</label>
-                                <div className="flex items-center space-x-2">
-                                    <input 
-                                        type="text" 
-                                        value={credentials.email} 
-                                        readOnly 
-                                        className="flex-1 px-3 py-2 bg-background border border-gray-700 rounded-md font-mono text-sm text-text-light"
-                                    />
-                                    <button 
-                                        onClick={() => navigator.clipboard.writeText(credentials.email)}
-                                        className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark text-sm"
-                                    >
-                                        Kopyala
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-text-dark mb-1">Şifre:</label>
-                                <div className="flex items-center space-x-2">
-                                    <input 
-                                        type={showPassword ? "text" : "password"} 
-                                        value={credentials.password || "••••••••"} 
-                                        readOnly 
-                                        className="flex-1 px-3 py-2 bg-background border border-gray-700 rounded-md font-mono text-sm text-text-light"
-                                    />
-                                    <button 
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="px-3 py-2 bg-secondary text-text-light rounded hover:bg-background text-sm"
-                                    >
-                                        {showPassword ? "Gizle" : "Göster"}
-                                    </button>
-                                    <button 
-                                        onClick={() => navigator.clipboard.writeText(credentials.password || "")}
-                                        className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark text-sm"
-                                    >
-                                        Kopyala
-                                    </button>
-                                </div>
-                                <p className="text-xs text-text-dark mt-1">
-                                    Not: Şifre güvenlik nedeniyle gizlenmiştir. Görüntülemek için "Göster" butonuna tıklayın.
-                                </p>
-                            </div>
+                {/* Giriş Bilgileri Accordion */}
+                <div className="bg-background border border-gray-700 rounded-lg">
+                    <button
+                        onClick={() => setShowCredentialsAccordion(!showCredentialsAccordion)}
+                        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-800 transition-colors rounded-lg"
+                    >
+                        <h4 className="text-lg font-semibold text-text-light">🔐 Giriş Bilgileri</h4>
+                        <span className={`transform transition-transform duration-200 ${showCredentialsAccordion ? 'rotate-180' : ''}`}>
+                            ▼
+                        </span>
+                    </button>
+                    
+                    {showCredentialsAccordion && (
+                        <div className="px-4 pb-4 border-t border-gray-700">
+                            {loadingCredentials ? (
+                                <p className="text-text-dark py-2">Giriş bilgileri yükleniyor...</p>
+                            ) : credentials ? (
+                                <div className="space-y-3 pt-3">
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-dark mb-1">Email:</label>
+                                        <div className="flex items-center space-x-2">
+                                            <input 
+                                                type="text" 
+                                                value={credentials.email} 
+                                                readOnly 
+                                                className="flex-1 px-3 py-2 bg-background border border-gray-700 rounded-md font-mono text-sm text-text-light"
+                                            />
+                                            <button 
+                                                onClick={() => navigator.clipboard.writeText(credentials.email)}
+                                                className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark text-sm"
+                                            >
+                                                Kopyala
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-dark mb-1">Şifre:</label>
+                                        <div className="flex items-center space-x-2">
+                                            <input 
+                                                type={showPassword ? "text" : "password"} 
+                                                value={credentials.password || "••••••••"} 
+                                                readOnly 
+                                                className="flex-1 px-3 py-2 bg-background border border-gray-700 rounded-md font-mono text-sm text-text-light"
+                                            />
+                                            <button 
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="px-3 py-2 bg-secondary text-text-light rounded hover:bg-background text-sm"
+                                            >
+                                                {showPassword ? "Gizle" : "Göster"}
+                                            </button>
+                                            <button 
+                                                onClick={() => navigator.clipboard.writeText(credentials.password || "")}
+                                                className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark text-sm"
+                                            >
+                                                Kopyala
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-text-dark mt-1">
+                                            Not: Şifre güvenlik nedeniyle gizlenmiştir. Görüntülemek için "Göster" butonuna tıklayın.
+                                        </p>
+                                    </div>
 
-                            {credentials.canResetPassword && (
-                                <div className="flex justify-between items-center pt-2 border-t border-gray-700">
-                                    <span className="text-sm text-text-dark">Şifre sıfırlama:</span>
-                                    <button 
-                                        type="button"
-                                        onClick={handlePasswordReset}
-                                        className="px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm font-semibold"
-                                    >
-                                        Yeni Şifre Oluştur
-                                    </button>
+                                    {credentials.canResetPassword && (
+                                        <div className="flex justify-between items-center pt-2 border-t border-gray-700">
+                                            <span className="text-sm text-text-dark">Şifre sıfırlama:</span>
+                                            <button 
+                                                type="button"
+                                                onClick={handlePasswordReset}
+                                                className="px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm font-semibold"
+                                            >
+                                                Yeni Şifre Oluştur
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
+                            ) : (
+                                <p className="text-text-dark py-2">Giriş bilgileri yüklenemedi.</p>
                             )}
                         </div>
-                    ) : (
-                        <p className="text-text-dark">Giriş bilgileri yüklenemedi.</p>
                     )}
                 </div>
 

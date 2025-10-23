@@ -812,4 +812,42 @@ export const api = {
         MOCK_SURVEY_QUESTIONS = MOCK_SURVEY_QUESTIONS.filter(q => q.id !== questionId);
         return simulateDelay({ success: true });
     },
+
+    // Oyuncu giriş bilgilerini alma
+    getPlayerCredentials: async (playerId: string): Promise<{ email: string; canResetPassword: boolean }> => {
+        if (isSupabaseConfigured()) {
+            try {
+                return await supabaseApi.getPlayerCredentials(playerId);
+            } catch (error) {
+                console.error('Supabase getPlayerCredentials error:', error);
+                // Fallback - mock data
+                const player = MOCK_PLAYERS.find(p => p.id === playerId);
+                return {
+                    email: player?.email || 'email@example.com',
+                    canResetPassword: false
+                };
+            }
+        }
+        // Mock data
+        const player = MOCK_PLAYERS.find(p => p.id === playerId);
+        return {
+            email: player?.email || 'email@example.com',
+            canResetPassword: false
+        };
+    },
+
+    // Oyuncu şifresini reset etme
+    resetPlayerPassword: async (playerId: string): Promise<{ newPassword: string }> => {
+        if (isSupabaseConfigured()) {
+            try {
+                return await supabaseApi.resetPlayerPassword(playerId);
+            } catch (error) {
+                console.error('Supabase resetPlayerPassword error:', error);
+                throw error;
+            }
+        }
+        // Mock data
+        const newPassword = `Player${Date.now().toString().slice(-6)}!`;
+        return { newPassword };
+    },
 };

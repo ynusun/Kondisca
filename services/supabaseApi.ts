@@ -576,4 +576,50 @@ export const supabaseApi = {
     if (error) throw error;
     return { success: true };
   },
+
+  // Oyuncu giriş bilgilerini alma (sadece email, şifre reset için)
+  getPlayerCredentials: async (playerId: string): Promise<{ email: string; canResetPassword: boolean }> => {
+    const { data: player, error } = await supabase
+      .from('players')
+      .select('email')
+      .eq('id', playerId)
+      .single();
+
+    if (error) throw error;
+
+    return {
+      email: player.email,
+      canResetPassword: true // Supabase'de şifre reset özelliği var
+    };
+  },
+
+  // Oyuncu şifresini reset etme
+  resetPlayerPassword: async (playerId: string): Promise<{ newPassword: string }> => {
+    if (!supabaseAdmin) {
+      throw new Error('Service role key not configured. Cannot reset passwords.');
+    }
+
+    const { data: player, error: playerError } = await supabase
+      .from('players')
+      .select('email')
+      .eq('id', playerId)
+      .single();
+
+    if (playerError) throw playerError;
+
+    const newPassword = `Player${Date.now().toString().slice(-6)}!`;
+    
+    // Supabase Auth ile şifre güncelle
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+      playerId,
+      { password: newPassword }
+    );
+
+    if (authError) {
+      console.error('Password reset error:', authError);
+      throw authError;
+    }
+
+    return { newPassword };
+  },
 };

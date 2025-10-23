@@ -308,6 +308,26 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
     const [phone, setPhone] = useState(player.phone || '');
     const [email, setEmail] = useState(player.email || '');
     const [birthDate, setBirthDate] = useState(player.birthDate ? new Date(player.birthDate).toISOString().split('T')[0] : '');
+    const [credentials, setCredentials] = useState<{ email: string; canResetPassword: boolean } | null>(null);
+    const [showPasswordReset, setShowPasswordReset] = useState(false);
+    const [newPassword, setNewPassword] = useState<string | null>(null);
+    const [loadingCredentials, setLoadingCredentials] = useState(false);
+    
+    // Giriş bilgilerini yükle
+    useEffect(() => {
+        const loadCredentials = async () => {
+            setLoadingCredentials(true);
+            try {
+                const creds = await api.getPlayerCredentials(player.id);
+                setCredentials(creds);
+            } catch (error) {
+                console.error('Failed to load credentials:', error);
+            } finally {
+                setLoadingCredentials(false);
+            }
+        };
+        loadCredentials();
+    }, [player.id]);
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -316,34 +336,153 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
         onClose();
     };
 
+    const handlePasswordReset = async () => {
+        try {
+            const result = await api.resetPlayerPassword(player.id);
+            setNewPassword(result.newPassword);
+            setShowPasswordReset(true);
+        } catch (error) {
+            console.error('Password reset failed:', error);
+            alert('Şifre sıfırlama başarısız oldu.');
+        }
+    };
+
+    // Şifre sıfırlama modal'ı
+    if (showPasswordReset && newPassword) {
+        return (
+            <Modal onClose={() => { setShowPasswordReset(false); setNewPassword(null); }} title="🔑 Yeni Şifre Oluşturuldu" zIndex="z-60">
+                <div className="space-y-4">
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        <p className="font-semibold">Oyuncu için yeni şifre oluşturuldu:</p>
+                    </div>
+                    <div className="bg-gray-100 p-4 rounded">
+                        <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">Email:</label>
+                            <div className="flex items-center space-x-2">
+                                <input 
+                                    type="text" 
+                                    value={credentials?.email || email} 
+                                    readOnly 
+                                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                />
+                                <button 
+                                    onClick={() => navigator.clipboard.writeText(credentials?.email || email)}
+                                    className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                >
+                                    Kopyala
+                                </button>
+                            </div>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Yeni Şifre:</label>
+                            <div className="flex items-center space-x-2">
+                                <input 
+                                    type="text" 
+                                    value={newPassword} 
+                                    readOnly 
+                                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                />
+                                <button 
+                                    onClick={() => navigator.clipboard.writeText(newPassword)}
+                                    className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                >
+                                    Kopyala
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                        <p className="text-sm">
+                            <strong>Önemli:</strong> Bu bilgileri oyuncuya verin. Oyuncu bu bilgilerle sisteme giriş yapabilir.
+                        </p>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                        <button 
+                            onClick={() => { setShowPasswordReset(false); setNewPassword(null); }}
+                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                        >
+                            Tamam
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+        );
+    }
+
     return (
         <Modal onClose={onClose} title="Oyuncu Bilgilerini Düzenle">
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-text-dark">Ad Soyad</label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
+            <div className="space-y-6">
+                {/* Giriş Bilgileri Bölümü */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3">🔐 Giriş Bilgileri</h4>
+                    {loadingCredentials ? (
+                        <p className="text-gray-500">Giriş bilgileri yükleniyor...</p>
+                    ) : credentials ? (
+                        <div className="space-y-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Email:</label>
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="text" 
+                                        value={credentials.email} 
+                                        readOnly 
+                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                    />
+                                    <button 
+                                        onClick={() => navigator.clipboard.writeText(credentials.email)}
+                                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                    >
+                                        Kopyala
+                                    </button>
+                                </div>
+                            </div>
+                            {credentials.canResetPassword && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">Şifre sıfırlama:</span>
+                                    <button 
+                                        type="button"
+                                        onClick={handlePasswordReset}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-semibold"
+                                    >
+                                        Yeni Şifre Oluştur
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-gray-500">Giriş bilgileri yüklenemedi.</p>
+                    )}
                 </div>
-                <div>
-                    <label className="block text-sm font-medium text-text-dark">Pozisyon</label>
-                    <input type="text" value={position} onChange={e => setPosition(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-text-dark">Doğum Tarihi</label>
-                    <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-text-dark">Telefon Numarası</label>
-                    <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-text-dark">E-posta Adresi</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
-                </div>
-                <div className="flex justify-between items-center pt-4">
-                     <button type="button" onClick={onDelete} className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 font-semibold">Oyuncuyu Sil</button>
-                    <button type="submit" className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark font-semibold">Kaydet</button>
-                </div>
-            </form>
+
+                {/* Oyuncu Bilgileri Formu */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800">👤 Oyuncu Bilgileri</h4>
+                    <div>
+                        <label className="block text-sm font-medium text-text-dark">Ad Soyad</label>
+                        <input type="text" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-text-dark">Pozisyon</label>
+                        <input type="text" value={position} onChange={e => setPosition(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-text-dark">Doğum Tarihi</label>
+                        <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
+                    </div>
+                     <div>
+                        <label className="block text-sm font-medium text-text-dark">Telefon Numarası</label>
+                        <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
+                    </div>
+                     <div>
+                        <label className="block text-sm font-medium text-text-dark">E-posta Adresi</label>
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md" />
+                    </div>
+                    <div className="flex justify-between items-center pt-4">
+                         <button type="button" onClick={onDelete} className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 font-semibold">Oyuncuyu Sil</button>
+                        <button type="submit" className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark font-semibold">Kaydet</button>
+                    </div>
+                </form>
+            </div>
         </Modal>
     );
 };

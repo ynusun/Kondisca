@@ -39,8 +39,15 @@ const evaluateFormula = (formula: string, dataPoint: CombinedDataPoint, allMetri
 
 // Helper components for Modals
 const Modal: React.FC<{ children: React.ReactNode, onClose: () => void, title: string, zIndex?: string }> = ({ children, onClose, title, zIndex = 'z-50' }) => (
-    <div className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center ${zIndex} p-4`}>
-        <div className="bg-card rounded-lg p-6 w-full max-w-lg">
+    <div 
+        className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center ${zIndex} p-4`}
+        onClick={(e) => {
+            if (e.target === e.currentTarget) {
+                onClose();
+            }
+        }}
+    >
+        <div className="bg-card rounded-lg p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold">{title}</h3>
                 <button onClick={onClose} className="text-text-dark hover:text-text-light text-2xl">&times;</button>
@@ -351,7 +358,7 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
     // Şifre sıfırlama modal'ı
     if (showPasswordReset && newPassword) {
         return (
-            <Modal onClose={() => { setShowPasswordReset(false); setNewPassword(null); }} title="🔑 Yeni Şifre Oluşturuldu" zIndex="z-[60]">
+            <Modal onClose={() => { setShowPasswordReset(false); setNewPassword(null); }} title="🔑 Yeni Şifre Oluşturuldu" zIndex="z-[70]">
                 <div className="space-y-4">
                     <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                         <p className="font-semibold">Oyuncu için yeni şifre oluşturuldu:</p>

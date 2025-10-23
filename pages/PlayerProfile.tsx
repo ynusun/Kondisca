@@ -642,7 +642,21 @@ const PlayerProfile: React.FC = () => {
     };
 
     const latestStats = useMemo(() => {
-        if (!player) return {};
+        if (!player || !metrics.length) return {};
+        
+        // Metric'leri isimlerine göre bul
+        const heightMetric = metrics.find(m => m.name.toLowerCase().includes('boy') || m.name.toLowerCase().includes('height'));
+        const weightMetric = metrics.find(m => m.name.toLowerCase().includes('kilo') || m.name.toLowerCase().includes('weight'));
+        const fatMetric = metrics.find(m => m.name.toLowerCase().includes('yağ') || m.name.toLowerCase().includes('fat'));
+        
+        // Debug: Bulunan metric'leri console'a yazdır
+        console.log('🔍 Metric Debug:', {
+            allMetrics: metrics.map(m => ({ id: m.id, name: m.name })),
+            heightMetric: heightMetric ? { id: heightMetric.id, name: heightMetric.name } : null,
+            weightMetric: weightMetric ? { id: weightMetric.id, name: weightMetric.name } : null,
+            fatMetric: fatMetric ? { id: fatMetric.id, name: fatMetric.name } : null,
+        });
+        
         const findLast = (metricId: string) => player.measurements
             .filter(m => m.metricId === metricId)
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.value;
@@ -659,12 +673,12 @@ const PlayerProfile: React.FC = () => {
         }
 
         return {
-            height: findLast('metric-1'),
-            weight: findLast('metric-2'),
-            fat: findLast('metric-3'),
+            height: heightMetric ? findLast(heightMetric.id) : undefined,
+            weight: weightMetric ? findLast(weightMetric.id) : undefined,
+            fat: fatMetric ? findLast(fatMetric.id) : undefined,
             age: age,
         };
-    }, [player]);
+    }, [player, metrics]);
     
     const chartData = useMemo(() => {
         if (!player || !metrics.length) return [];

@@ -15,6 +15,7 @@ export enum MetricInputType {
     Manual = 'manual',
     Calculated = 'calculated',
     Survey = 'survey',
+    PercentageChange = 'percentage_change',
 }
 
 export interface Metric {
@@ -26,6 +27,9 @@ export interface Metric {
     surveyQuestionKey?: string;
     isActive: boolean;
     showInRadar?: boolean;
+    // Yüzdelik değişim için
+    baseMetricId?: string; // Hangi metriğin yüzdelik değişimini hesaplayacağız
+    percentageChangePeriod?: number; // Kaç önceki değerle karşılaştırılacak (default: 1)
 }
 
 export interface Measurement {

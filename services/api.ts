@@ -850,4 +850,37 @@ export const api = {
         const newPassword = `Player${Date.now().toString().slice(-6)}!`;
         return { newPassword };
     },
+
+    // Yüzdelik değişim hesaplama
+    calculatePercentageChange: async (playerId: string, metricId: string): Promise<Measurement[]> => {
+        if (isSupabaseConfigured()) {
+            try {
+                return await supabaseApi.calculatePercentageChange(playerId, metricId);
+            } catch (error) {
+                console.error('Supabase calculatePercentageChange error:', error);
+                // Mock data - örnek yüzdelik değişim verileri
+                const mockData: Measurement[] = [];
+                for (let i = 0; i < 5; i++) {
+                    mockData.push({
+                        id: `pc-mock-${i}`,
+                        metricId: metricId,
+                        value: (Math.random() - 0.5) * 20, // -10 ile +10 arası yüzdelik değişim
+                        date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+                    });
+                }
+                return simulateDelay(mockData);
+            }
+        }
+        // Mock data
+        const mockData: Measurement[] = [];
+        for (let i = 0; i < 5; i++) {
+            mockData.push({
+                id: `pc-mock-${i}`,
+                metricId: metricId,
+                value: (Math.random() - 0.5) * 20,
+                date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+            });
+        }
+        return simulateDelay(mockData);
+    },
 };

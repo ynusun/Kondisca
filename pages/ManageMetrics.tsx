@@ -16,6 +16,8 @@ const MetricModal: React.FC<{
     const [formula, setFormula] = useState(metric?.formula || '');
     const [surveyQuestionKey, setSurveyQuestionKey] = useState(metric?.surveyQuestionKey || '');
     const [showInRadar, setShowInRadar] = useState(metric?.showInRadar || false);
+    const [baseMetricId, setBaseMetricId] = useState(metric?.baseMetricId || '');
+    const [percentageChangePeriod, setPercentageChangePeriod] = useState(metric?.percentageChangePeriod || 1);
     
     const isEditing = !!metric;
 
@@ -28,6 +30,8 @@ const MetricModal: React.FC<{
             formula: inputType === MetricInputType.Calculated ? formula : '',
             surveyQuestionKey: inputType === MetricInputType.Survey ? surveyQuestionKey : '',
             showInRadar,
+            baseMetricId: inputType === MetricInputType.PercentageChange ? baseMetricId : undefined,
+            percentageChangePeriod: inputType === MetricInputType.PercentageChange ? percentageChangePeriod : undefined,
         };
         try {
             if (isEditing) {
@@ -89,6 +93,10 @@ const MetricModal: React.FC<{
                                 <input type="radio" className="form-radio text-primary" name="metricType" value={MetricInputType.Survey} checked={inputType === MetricInputType.Survey} onChange={() => setInputType(MetricInputType.Survey)} />
                                 <span className="ml-2">Anket Verisi</span>
                             </label>
+                            <label className="inline-flex items-center">
+                                <input type="radio" className="form-radio text-primary" name="metricType" value={MetricInputType.PercentageChange} checked={inputType === MetricInputType.PercentageChange} onChange={() => setInputType(MetricInputType.PercentageChange)} />
+                                <span className="ml-2">Yüzdelik Değişim</span>
+                            </label>
                         </div>
                     </div>
                      {inputType === MetricInputType.Survey && (
@@ -100,6 +108,40 @@ const MetricModal: React.FC<{
                                     <option key={q.id} value={q.key}>{q.label}</option>
                                 ))}
                             </select>
+                        </div>
+                    )}
+                    {inputType === MetricInputType.PercentageChange && (
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-text-dark">Temel Metrik</label>
+                                <select value={baseMetricId} onChange={e => setBaseMetricId(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md">
+                                    <option value="" disabled>Bir metrik seçin...</option>
+                                    {allMetrics.filter(m => m.isActive && m.inputType !== MetricInputType.PercentageChange).map(m => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-text-dark mt-1">Yüzdelik değişimi hesaplanacak temel metrik</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-dark">Karşılaştırma Periyodu</label>
+                                <input 
+                                    type="number" 
+                                    value={percentageChangePeriod} 
+                                    onChange={e => setPercentageChangePeriod(parseInt(e.target.value) || 1)} 
+                                    min="1" 
+                                    max="10"
+                                    className="mt-1 block w-full px-3 py-2 bg-background border border-gray-700 rounded-md"
+                                />
+                                <p className="text-xs text-text-dark mt-1">Kaç önceki değerle karşılaştırılacak (örn: 1 = bir önceki, 2 = iki önceki)</p>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <h4 className="font-semibold text-blue-800 mb-2">📊 Yüzdelik Değişim Açıklaması</h4>
+                                <p className="text-sm text-blue-700">
+                                    Bu metrik, seçilen temel metriğin değerlerinin yüzdelik değişimini hesaplar. 
+                                    Örneğin: ACWR'nin yüzdelik değişimi, ACWR değerinin bir önceki değere göre 
+                                    ne kadar arttığını veya azaldığını gösterir.
+                                </p>
+                            </div>
                         </div>
                     )}
                     <div className="flex items-center">
@@ -237,6 +279,12 @@ const ManageMetrics: React.FC = () => {
                                         {metric.inputType === MetricInputType.Survey && (
                                             <p className="text-xs text-text-dark font-mono mt-1 break-all">
                                                 Soru: {surveyQuestions.find(q => q.key === metric.surveyQuestionKey)?.label || metric.surveyQuestionKey}
+                                            </p>
+                                        )}
+                                        {metric.inputType === MetricInputType.PercentageChange && (
+                                            <p className="text-xs text-text-dark font-mono mt-1 break-all">
+                                                Temel: {allMetrics.find(m => m.id === metric.baseMetricId)?.name || 'Bilinmiyor'} 
+                                                {metric.percentageChangePeriod && metric.percentageChangePeriod > 1 && ` (${metric.percentageChangePeriod} önceki)`}
                                             </p>
                                         )}
                                     </td>

@@ -34,6 +34,8 @@ const convertMetric = (row: any): Metric => ({
   surveyQuestionKey: row.survey_question_key,
   isActive: row.is_active,
   showInRadar: row.show_in_radar,
+  baseMetricId: row.base_metric_id,
+  percentageChangePeriod: row.percentage_change_period,
 });
 
 const convertMeasurement = (row: any): Measurement => ({
@@ -621,5 +623,60 @@ export const supabaseApi = {
     }
 
     return { newPassword };
+  },
+
+  // Yüzdelik değişim hesaplama
+  calculatePercentageChange: async (playerId: string, metricId: string): Promise<Measurement[]> => {
+    // Önce metriğin detaylarını al
+    const { data: metric, error: metricError } = await supabase
+      .from('metrics')
+      .select('*')
+      .eq('id', metricId)
+      .single();
+
+    if (metricError || !metric || metric.input_type !== 'percentage_change') {
+      throw new Error('Invalid metric for percentage change calculation');
+    }
+
+    if (!metric.base_metric_id) {
+      throw new Error('Base metric not specified for percentage change calculation');
+    }
+
+    // Base metric'in ölçümlerini al
+    const { data: baseMeasurements, error: baseError } = await supabase
+      .from('measurements')
+      .select('*')
+      .eq('player_id', playerId)
+      .eq('metric_id', metric.base_metric_id)
+      .order('date', { ascending: true });
+
+    if (baseError) throw baseError;
+
+    if (baseMeasurements.length < 2) {
+      return []; // Yeterli veri yok
+    }
+
+    const period = metric.percentage_change_period || 1;
+    const percentageMeasurements: Measurement[] = [];
+
+    for (let i = period; i < baseMeasurements.length; i++) {
+      const currentValue = baseMeasurements[i].value;
+      const previousValue = baseMeasurements[i - period].value;
+      
+      if (previousValue === 0) {
+        continue; // Sıfıra bölme hatası
+      }
+
+      const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+      
+      percentageMeasurements.push({
+        id: `pc-${Date.now()}-${i}`,
+        metricId: metricId,
+        value: parseFloat(percentageChange.toFixed(2)),
+        date: baseMeasurements[i].date,
+      });
+    }
+
+    return percentageMeasurements;
   },
 };

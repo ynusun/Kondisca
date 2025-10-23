@@ -351,7 +351,7 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
     // Şifre sıfırlama modal'ı
     if (showPasswordReset && newPassword) {
         return (
-            <Modal onClose={() => { setShowPasswordReset(false); setNewPassword(null); }} title="🔑 Yeni Şifre Oluşturuldu" zIndex="z-60">
+            <Modal onClose={() => { setShowPasswordReset(false); setNewPassword(null); }} title="🔑 Yeni Şifre Oluşturuldu" zIndex="z-[60]">
                 <div className="space-y-4">
                     <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                         <p className="font-semibold">Oyuncu için yeni şifre oluşturuldu:</p>
@@ -414,24 +414,24 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
         <Modal onClose={onClose} title="Oyuncu Bilgilerini Düzenle">
             <div className="space-y-6">
                 {/* Giriş Bilgileri Bölümü */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3">🔐 Giriş Bilgileri</h4>
+                <div className="bg-background border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-text-light mb-3">🔐 Giriş Bilgileri</h4>
                     {loadingCredentials ? (
-                        <p className="text-gray-500">Giriş bilgileri yükleniyor...</p>
+                        <p className="text-text-dark">Giriş bilgileri yükleniyor...</p>
                     ) : credentials ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Email:</label>
+                                <label className="block text-sm font-medium text-text-dark mb-1">Email:</label>
                                 <div className="flex items-center space-x-2">
                                     <input 
                                         type="text" 
                                         value={credentials.email} 
                                         readOnly 
-                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                        className="flex-1 px-3 py-2 bg-background border border-gray-700 rounded-md font-mono text-sm text-text-light"
                                     />
                                     <button 
                                         onClick={() => navigator.clipboard.writeText(credentials.email)}
-                                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                        className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark text-sm"
                                     >
                                         Kopyala
                                     </button>
@@ -439,39 +439,39 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Şifre:</label>
+                                <label className="block text-sm font-medium text-text-dark mb-1">Şifre:</label>
                                 <div className="flex items-center space-x-2">
                                     <input 
                                         type={showPassword ? "text" : "password"} 
                                         value={credentials.password || "••••••••"} 
                                         readOnly 
-                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                        className="flex-1 px-3 py-2 bg-background border border-gray-700 rounded-md font-mono text-sm text-text-light"
                                     />
                                     <button 
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
+                                        className="px-3 py-2 bg-secondary text-text-light rounded hover:bg-background text-sm"
                                     >
                                         {showPassword ? "Gizle" : "Göster"}
                                     </button>
                                     <button 
                                         onClick={() => navigator.clipboard.writeText(credentials.password || "")}
-                                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                        className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark text-sm"
                                     >
                                         Kopyala
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-text-dark mt-1">
                                     Not: Şifre güvenlik nedeniyle gizlenmiştir. Görüntülemek için "Göster" butonuna tıklayın.
                                 </p>
                             </div>
 
                             {credentials.canResetPassword && (
-                                <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                                    <span className="text-sm text-gray-600">Şifre sıfırlama:</span>
+                                <div className="flex justify-between items-center pt-2 border-t border-gray-700">
+                                    <span className="text-sm text-text-dark">Şifre sıfırlama:</span>
                                     <button 
                                         type="button"
                                         onClick={handlePasswordReset}
-                                        className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-semibold"
+                                        className="px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm font-semibold"
                                     >
                                         Yeni Şifre Oluştur
                                     </button>
@@ -479,7 +479,7 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
                             )}
                         </div>
                     ) : (
-                        <p className="text-gray-500">Giriş bilgileri yüklenemedi.</p>
+                        <p className="text-text-dark">Giriş bilgileri yüklenemedi.</p>
                     )}
                 </div>
 

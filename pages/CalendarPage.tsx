@@ -4,7 +4,7 @@ import { ScheduleEvent, Player } from '../types';
 import { ICONS } from '../constants';
 
 const ConfirmationModal: React.FC<{ title: string, message: string, onConfirm: () => void, onCancel: () => void, confirmText?: string }> = ({ title, message, onConfirm, onCancel, confirmText = 'Onayla' }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4">
         <div className="bg-card rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-bold mb-4">{title}</h3>
             <p className="text-text-dark mb-6">{message}</p>
@@ -58,7 +58,7 @@ const EventModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[90] p-4">
             <div className="bg-card rounded-lg p-6 w-full max-w-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">{isEditing ? "Programı Düzenle" : "Yeni Program Ekle"}</h3>

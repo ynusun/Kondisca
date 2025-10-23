@@ -1,0 +1,5 @@
+{
+  "name": "Kondisca",
+  "description": "A web application for basketball conditioners to manage, track, and analyze player measurements and wellness data. Players can also view their progress and complete daily wellness surveys.",
+  "requestFramePermissions": []
+}

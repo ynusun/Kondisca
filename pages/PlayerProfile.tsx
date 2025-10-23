@@ -40,14 +40,14 @@ const evaluateFormula = (formula: string, dataPoint: CombinedDataPoint, allMetri
 // Helper components for Modals
 const Modal: React.FC<{ children: React.ReactNode, onClose: () => void, title: string, zIndex?: string }> = ({ children, onClose, title, zIndex = 'z-50' }) => (
     <div 
-        className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center ${zIndex} p-4`}
+        className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center ${zIndex} p-4 overflow-y-auto`}
         onClick={(e) => {
             if (e.target === e.currentTarget) {
                 onClose();
             }
         }}
     >
-        <div className="bg-card rounded-lg p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-card rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto my-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold">{title}</h3>
                 <button onClick={onClose} className="text-text-dark hover:text-text-light text-2xl">&times;</button>

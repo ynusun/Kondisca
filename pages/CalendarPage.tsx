@@ -5,14 +5,14 @@ import { ICONS } from '../constants';
 
 const ConfirmationModal: React.FC<{ title: string, message: string, onConfirm: () => void, onCancel: () => void, confirmText?: string }> = ({ title, message, onConfirm, onCancel, confirmText = 'Onayla' }) => (
     <div 
-        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4"
+        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4 overflow-y-auto"
         onClick={(e) => {
             if (e.target === e.currentTarget) {
                 onCancel();
             }
         }}
     >
-        <div className="bg-card rounded-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-card rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto my-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-bold mb-4">{title}</h3>
             <p className="text-text-dark mb-6">{message}</p>
             <div className="flex justify-end space-x-4">
@@ -66,19 +66,19 @@ const EventModal: React.FC<{
 
     return (
         <div 
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[80] p-4"
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[80] p-4 overflow-y-auto"
             onClick={(e) => {
                 if (e.target === e.currentTarget) {
                     onClose();
                 }
             }}
         >
-            <div className="bg-card rounded-lg p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-card rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto my-4" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">{isEditing ? "Programı Düzenle" : "Yeni Program Ekle"}</h3>
                     <button onClick={onClose} className="text-text-dark hover:text-text-light text-2xl">&times;</button>
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <input type="text" placeholder="Program Başlığı" value={title} onChange={e => setTitle(e.target.value)} required className="w-full p-2 bg-background border border-gray-700 rounded"/>
                     <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full p-2 bg-background border border-gray-700 rounded"/>
                     <textarea placeholder="Açıklama (opsiyonel)" value={description} onChange={e => setDescription(e.target.value)} rows={2} className="w-full p-2 bg-background border border-gray-700 rounded"></textarea>

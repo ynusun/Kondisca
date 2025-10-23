@@ -308,10 +308,11 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
     const [phone, setPhone] = useState(player.phone || '');
     const [email, setEmail] = useState(player.email || '');
     const [birthDate, setBirthDate] = useState(player.birthDate ? new Date(player.birthDate).toISOString().split('T')[0] : '');
-    const [credentials, setCredentials] = useState<{ email: string; canResetPassword: boolean } | null>(null);
+    const [credentials, setCredentials] = useState<{ email: string; canResetPassword: boolean; password?: string } | null>(null);
     const [showPasswordReset, setShowPasswordReset] = useState(false);
     const [newPassword, setNewPassword] = useState<string | null>(null);
     const [loadingCredentials, setLoadingCredentials] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     
     // Giriş bilgilerini yükle
     useEffect(() => {
@@ -418,7 +419,7 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
                     {loadingCredentials ? (
                         <p className="text-gray-500">Giriş bilgileri yükleniyor...</p>
                     ) : credentials ? (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Email:</label>
                                 <div className="flex items-center space-x-2">
@@ -436,8 +437,36 @@ const EditPlayerInfoModal: React.FC<{ player: Player; onClose: () => void; onSav
                                     </button>
                                 </div>
                             </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Şifre:</label>
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type={showPassword ? "text" : "password"} 
+                                        value={credentials.password || "••••••••"} 
+                                        readOnly 
+                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                    />
+                                    <button 
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
+                                    >
+                                        {showPassword ? "Gizle" : "Göster"}
+                                    </button>
+                                    <button 
+                                        onClick={() => navigator.clipboard.writeText(credentials.password || "")}
+                                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                    >
+                                        Kopyala
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Not: Şifre güvenlik nedeniyle gizlenmiştir. Görüntülemek için "Göster" butonuna tıklayın.
+                                </p>
+                            </div>
+
                             {credentials.canResetPassword && (
-                                <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                                     <span className="text-sm text-gray-600">Şifre sıfırlama:</span>
                                     <button 
                                         type="button"

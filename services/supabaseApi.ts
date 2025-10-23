@@ -579,8 +579,8 @@ export const supabaseApi = {
     return { success: true };
   },
 
-  // Oyuncu giriş bilgilerini alma (sadece email, şifre reset için)
-  getPlayerCredentials: async (playerId: string): Promise<{ email: string; canResetPassword: boolean }> => {
+  // Oyuncu giriş bilgilerini alma (email ve mock şifre)
+  getPlayerCredentials: async (playerId: string): Promise<{ email: string; canResetPassword: boolean; password?: string }> => {
     const { data: player, error } = await supabase
       .from('players')
       .select('email')
@@ -589,9 +589,14 @@ export const supabaseApi = {
 
     if (error) throw error;
 
+    // Not: Gerçek şifreler Supabase'de hash'lenmiş olarak saklanır ve geri alınamaz
+    // Bu yüzden mock bir şifre gösteriyoruz (geliştirme amaçlı)
+    const mockPassword = `Player${playerId.slice(-6)}!`;
+
     return {
       email: player.email,
-      canResetPassword: true // Supabase'de şifre reset özelliği var
+      canResetPassword: true,
+      password: mockPassword // Mock şifre - gerçek uygulamada bu alan olmayacak
     };
   },
 

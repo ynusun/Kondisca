@@ -814,7 +814,7 @@ export const api = {
     },
 
     // Oyuncu giriş bilgilerini alma
-    getPlayerCredentials: async (playerId: string): Promise<{ email: string; canResetPassword: boolean }> => {
+    getPlayerCredentials: async (playerId: string): Promise<{ email: string; canResetPassword: boolean; password?: string }> => {
         if (isSupabaseConfigured()) {
             try {
                 return await supabaseApi.getPlayerCredentials(playerId);
@@ -824,7 +824,8 @@ export const api = {
                 const player = MOCK_PLAYERS.find(p => p.id === playerId);
                 return {
                     email: player?.email || 'email@example.com',
-                    canResetPassword: false
+                    canResetPassword: false,
+                    password: `Player${playerId.slice(-6)}!`
                 };
             }
         }
@@ -832,7 +833,8 @@ export const api = {
         const player = MOCK_PLAYERS.find(p => p.id === playerId);
         return {
             email: player?.email || 'email@example.com',
-            canResetPassword: false
+            canResetPassword: false,
+            password: `Player${playerId.slice(-6)}!`
         };
     },
 

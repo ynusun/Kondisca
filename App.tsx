@@ -7,7 +7,7 @@ import ConditionerDashboard from './pages/ConditionerDashboard';
 import PlayerDashboard from './pages/PlayerDashboard';
 import PlayerProfile from './pages/PlayerProfile';
 import ManageMetrics from './pages/ManageMetrics';
-import DailySurvey from './pages/DailySurvey';
+import DailySurveyPage from './pages/DailySurvey';
 import CalendarPage from './pages/CalendarPage';
 import DashboardLayout from './components/DashboardLayout';
 import { UserRole } from './types';
@@ -49,7 +49,7 @@ const AppRoutes: React.FC = () => {
                   {user.role === UserRole.Player && (
                     <>
                       <Route path="/" element={<PlayerDashboard />} />
-                      <Route path="/survey" element={<DailySurvey />} />
+                      <Route path="/survey" element={<DailySurveyPage />} />
                     </>
                   )}
                   <Route path="*" element={<Navigate to="/" />} />

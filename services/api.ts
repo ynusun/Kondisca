@@ -679,9 +679,23 @@ export const api = {
     addPlayer: async (playerData: Omit<Player, 'id' | 'avatarUrl' | 'measurements' | 'notes' | 'dailySurveys' | 'injury' | 'injuryHistory'>): Promise<Player> => {
         if (isSupabaseConfigured()) {
             try {
-                return await supabaseApi.addPlayer(playerData);
+                console.log('🔧 Supabase configured, attempting to add player...');
+                const result = await supabaseApi.addPlayer(playerData);
+                console.log('✅ Player added successfully:', result);
+                
+                // Şifre bilgisini console'a yazdır (geliştirme için)
+                if ('tempPassword' in result) {
+                    console.log('🔑 Yeni Oyuncu Giriş Bilgileri:');
+                    console.log('Email:', result.email);
+                    console.log('Password:', result.tempPassword);
+                    console.log('Bu bilgileri oyuncuya verin!');
+                }
+                return result;
             } catch (error) {
-                console.error('Supabase addPlayer error:', error);
+                console.error('❌ Supabase addPlayer error:', error);
+                console.error('Error details:', error);
+                
+                // Fallback to mock data
                 const newPlayer: Player = {
                     ...playerData,
                     id: `player-${Date.now()}`,

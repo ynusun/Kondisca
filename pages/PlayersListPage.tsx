@@ -9,6 +9,8 @@ const AddPlayerModal: React.FC<{ onClose: () => void; onSave: () => void; }> = (
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [birthDate, setBirthDate] = useState('');
+    const [showCredentials, setShowCredentials] = useState(false);
+    const [playerCredentials, setPlayerCredentials] = useState<{email: string, password: string} | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -16,10 +18,101 @@ const AddPlayerModal: React.FC<{ onClose: () => void; onSave: () => void; }> = (
             alert('Ad ve pozisyon alanları zorunludur.');
             return;
         }
-        await api.addPlayer({ name, position, phone, email, birthDate: birthDate ? new Date(birthDate).toISOString() : undefined });
+        
+        try {
+            const result = await api.addPlayer({ name, position, phone, email, birthDate: birthDate ? new Date(birthDate).toISOString() : undefined });
+            
+            // Eğer Supabase kullanılıyorsa ve geçici şifre varsa
+            if ('tempPassword' in result && result.tempPassword) {
+                setPlayerCredentials({
+                    email: result.email || email,
+                    password: result.tempPassword
+                });
+                setShowCredentials(true);
+            } else {
+                onSave();
+                onClose();
+            }
+        } catch (error) {
+            console.error('Oyuncu ekleme hatası:', error);
+            alert('Oyuncu eklenirken hata oluştu.');
+        }
+    };
+
+    const handleCloseCredentials = () => {
+        setShowCredentials(false);
+        setPlayerCredentials(null);
         onSave();
         onClose();
     };
+
+    // Giriş bilgilerini gösteren modal
+    if (showCredentials && playerCredentials) {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                <div className="bg-card rounded-lg p-6 w-full max-w-lg">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold text-green-600">✅ Oyuncu Başarıyla Eklendi!</h3>
+                        <button onClick={handleCloseCredentials} className="text-text-dark hover:text-text-light text-2xl">&times;</button>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                            <p className="font-semibold">Oyuncu giriş bilgileri:</p>
+                        </div>
+                        <div className="bg-gray-100 p-4 rounded">
+                            <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700">Email:</label>
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="text" 
+                                        value={playerCredentials.email} 
+                                        readOnly 
+                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                    />
+                                    <button 
+                                        onClick={() => navigator.clipboard.writeText(playerCredentials.email)}
+                                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        Kopyala
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Şifre:</label>
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="text" 
+                                        value={playerCredentials.password} 
+                                        readOnly 
+                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
+                                    />
+                                    <button 
+                                        onClick={() => navigator.clipboard.writeText(playerCredentials.password)}
+                                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        Kopyala
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                            <p className="text-sm">
+                                <strong>Önemli:</strong> Bu bilgileri oyuncuya verin. Oyuncu bu bilgilerle sisteme giriş yapabilir.
+                            </p>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                            <button 
+                                onClick={handleCloseCredentials}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                                Tamam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">

@@ -24,7 +24,7 @@ const RangeSlider: React.FC<{ value: number, setValue: (value: number) => void, 
     );
 };
 
-const DailySurvey: React.FC = () => {
+const DailySurveyPage: React.FC = () => {
     const { user } = useAuth();
     const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
     const [answers, setAnswers] = useState<Partial<Omit<DailySurvey, 'date'>>>({
@@ -148,4 +148,4 @@ const DailySurvey: React.FC = () => {
     );
 };
 
-export default DailySurvey;
+export default DailySurveyPage;

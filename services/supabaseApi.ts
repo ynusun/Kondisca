@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 import { User, UserRole, Player, Metric, MetricInputType, Measurement, ScheduleEvent, Note, DailySurvey, Injury, SurveyQuestion } from '../types';
 
 // Helper function to convert database rows to app types
@@ -154,13 +154,35 @@ export const supabaseApi = {
   },
 
   addPlayer: async (playerData: Omit<Player, 'id' | 'avatarUrl' | 'measurements' | 'notes' | 'dailySurveys' | 'injury' | 'injuryHistory'>): Promise<Player> => {
+    // Service role key kontrolü
+    if (!supabaseAdmin) {
+      throw new Error('Service role key not configured. Cannot create user accounts.');
+    }
+
+    // Önce oyuncu için giriş bilgileri oluştur
+    const playerEmail = playerData.email || `${playerData.name.toLowerCase().replace(/\s+/g, '.')}@kondisca.com`;
+    const playerPassword = `Player${Date.now().toString().slice(-6)}!`;
+    
+    // Supabase Auth ile kullanıcı oluştur (admin client kullanarak)
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: playerEmail,
+      password: playerPassword,
+      email_confirm: true,
+    });
+
+    if (authError) {
+      console.error('Auth error:', authError);
+      throw authError;
+    }
+
+    // Oyuncu profilini oluştur
     const { data, error } = await supabase
       .from('players')
       .insert({
         name: playerData.name,
         position: playerData.position,
         phone: playerData.phone,
-        email: playerData.email,
+        email: playerEmail,
         birth_date: playerData.birthDate,
         avatar_url: `https://picsum.photos/seed/${Date.now()}/200/200`,
       })
@@ -168,7 +190,25 @@ export const supabaseApi = {
       .single();
 
     if (error) throw error;
-    return convertPlayer(data);
+
+    // Users tablosuna da ekle
+    await supabase
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        name: playerData.name,
+        email: playerEmail,
+        role: 'player',
+        avatar_url: `https://picsum.photos/seed/${Date.now()}/200/200`,
+      });
+
+    // Oyuncu bilgilerini döndür (şifre bilgisi ile birlikte)
+    const player = convertPlayer(data);
+    return {
+      ...player,
+      // Geçici olarak şifre bilgisini ekle (sadece oluşturma sırasında)
+      tempPassword: playerPassword,
+    } as Player & { tempPassword: string };
   },
 
   updatePlayerInfo: async (playerId: string, updates: Partial<Player>): Promise<Player> => {

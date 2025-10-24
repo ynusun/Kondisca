@@ -403,7 +403,6 @@ export const supabaseApi = {
         description: updates.description,
         is_team_event: updates.isTeamEvent,
         player_ids: updates.playerIds,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', eventId)
       .select()

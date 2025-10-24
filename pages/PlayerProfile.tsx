@@ -714,7 +714,12 @@ const PlayerProfile: React.FC = () => {
             age: age,
         };
         
-        console.log('📊 Latest Stats Result:', result);
+        console.log('📊 Latest Stats Result:', {
+            height: { metric: heightMetric?.name, value: result.height },
+            weight: { metric: weightMetric?.name, value: result.weight },
+            fat: { metric: fatMetric?.name, value: result.fat },
+            age: result.age
+        });
         return result;
     }, [player, metrics]);
     

@@ -111,10 +111,26 @@ const ConditionerDashboard: React.FC = () => {
     }, [schedule]);
 
     const leaderboardData = useMemo(() => {
+        console.log('🔍 Leaderboard Debug:', {
+            leaderboardMetricId,
+            players: players.map(p => ({
+                name: p.name,
+                totalMeasurements: p.measurements.length,
+                relevantMeasurements: p.measurements.filter(m => m.metricId === leaderboardMetricId).length
+            }))
+        });
+        
         const data = players.map(player => {
             const relevantMeasurements = player.measurements
                 .filter(m => m.metricId === leaderboardMetricId)
                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+            console.log(`🔍 ${player.name} measurements:`, {
+                metricId: leaderboardMetricId,
+                total: player.measurements.length,
+                relevant: relevantMeasurements.length,
+                measurements: relevantMeasurements.map(m => ({ value: m.value, date: m.date }))
+            });
 
             if (relevantMeasurements.length === 0) {
                 return { ...player, improvementPercent: 0, improvementUnit: 0, latestValue: undefined };

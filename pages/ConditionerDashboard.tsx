@@ -76,7 +76,7 @@ const ConditionerDashboard: React.FC = () => {
     const [metrics, setMetrics] = useState<Metric[]>([]);
     const [schedule, setSchedule] = useState<ScheduleEvent[]>([]);
     const [loading, setLoading] = useState(true);
-    const [leaderboardMetricId, setLeaderboardMetricId] = useState('metric-4');
+    const [leaderboardMetricId, setLeaderboardMetricId] = useState('');
     const [leaderboardChangeType, setLeaderboardChangeType] = useState<'percent' | 'unit'>('percent');
     const [leaderboardSortOrder, setLeaderboardSortOrder] = useState<'desc' | 'asc'>('desc');
     const [showInjuredModal, setShowInjuredModal] = useState(false);
@@ -92,8 +92,17 @@ const ConditionerDashboard: React.FC = () => {
                     api.getScheduleEvents()
                 ]);
                 setPlayers(playerData);
-                setMetrics(metricsData.filter(m => m.isActive));
+                const activeMetrics = metricsData.filter(m => m.isActive);
+                setMetrics(activeMetrics);
                 setSchedule(scheduleData);
+                
+                // İlk mevcut metric'i seç
+                if (activeMetrics.length > 0 && !leaderboardMetricId) {
+                    const firstMetric = activeMetrics.find(m => m.inputType === MetricInputType.Manual && m.id !== 'metric-1');
+                    if (firstMetric) {
+                        setLeaderboardMetricId(firstMetric.id);
+                    }
+                }
             } catch (error) {
                 console.error("Failed to fetch dashboard data:", error);
             } finally {
@@ -110,11 +119,15 @@ const ConditionerDashboard: React.FC = () => {
         return schedule.filter(event => event.date === today);
     }, [schedule]);
 
+    const selectedMetric = metrics.find(m => m.id === leaderboardMetricId);
+    
     const leaderboardData = useMemo(() => {
         console.log('🔍 Leaderboard Debug:', {
             leaderboardMetricId,
-            selectedMetric: metrics.find(m => m.id === leaderboardMetricId)?.name,
+            selectedMetric: selectedMetric?.name,
+            selectedMetricFound: !!selectedMetric,
             allMetrics: metrics.map(m => ({ id: m.id, name: m.name })),
+            metricIdExists: metrics.some(m => m.id === leaderboardMetricId),
             players: players.map(p => ({
                 name: p.name,
                 totalMeasurements: p.measurements.length,
@@ -214,8 +227,6 @@ const ConditionerDashboard: React.FC = () => {
     if (loading) {
         return <div className="text-center p-10">Gösterge paneli yükleniyor...</div>;
     }
-
-    const selectedMetric = metrics.find(m => m.id === leaderboardMetricId);
 
     return (
         <div className="space-y-6">

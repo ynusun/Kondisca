@@ -212,7 +212,7 @@ const ConditionerDashboard: React.FC = () => {
                 }))
             });
             
-            // Eğer hiç veri yoksa, boş liste döndür
+            // Eğer hiç veri yoksa, oyuncuları veri olmadan göster
             if (filteredData.length === 0) {
                 console.log('⚠️ No data found for selected metric');
                 console.log('🔍 All players data:', data.map(p => ({
@@ -220,7 +220,14 @@ const ConditionerDashboard: React.FC = () => {
                     latestValue: p.latestValue,
                     hasMeasurements: p.measurements.length > 0
                 })));
-                return [];
+                
+                // Veri olmayan oyuncuları göster
+                return players.slice(0, 5).map(p => ({
+                    ...p,
+                    latestValue: undefined,
+                    improvementPercent: 0,
+                    improvementUnit: 0
+                }));
             }
             
             return filteredData
@@ -348,7 +355,7 @@ const ConditionerDashboard: React.FC = () => {
                                             <span className={`font-bold text-lg ${displayClass}`}>
                                                {displayValue}
                                             </span>
-                                            {!isLatest && (
+                                            {!isLatest && player.latestValue !== undefined && (
                                                 <p className="text-xs text-text-dark">Son: {player.latestValue?.toFixed(2)} {selectedMetric?.unit}</p>
                                             )}
                                        </div>
@@ -369,6 +376,9 @@ const ConditionerDashboard: React.FC = () => {
                             </p>
                             <p className="text-xs text-gray-500">
                                 Toplam oyuncu: {players.length}, Toplam metrik: {metrics.length}
+                            </p>
+                            <p className="text-xs text-red-500 mt-2">
+                                💡 Bu oyuncular için henüz ölçüm verisi girilmemiş. Ölçüm eklemek için oyuncu profilini ziyaret edin.
                             </p>
                          </div>
                     )}

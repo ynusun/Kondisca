@@ -677,13 +677,22 @@ const PlayerProfile: React.FC = () => {
             heightMetric: heightMetric ? { id: heightMetric.id, name: heightMetric.name } : null,
             weightMetric: weightMetric ? { id: weightMetric.id, name: weightMetric.name } : null,
             fatMetric: fatMetric ? { id: fatMetric.id, name: fatMetric.name } : null,
+            playerMeasurements: player.measurements.map(m => ({ 
+                metricId: m.metricId, 
+                value: m.value, 
+                date: m.date 
+            }))
         });
         
         const findLast = (metricId: string) => {
             const measurements = player.measurements.filter(m => m.metricId === metricId);
             const sorted = measurements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             const latest = sorted[0];
-            console.log(`🔍 ${metricId} measurements:`, measurements.length, 'latest:', latest);
+            console.log(`🔍 ${metricId} measurements:`, {
+                total: measurements.length,
+                all: measurements.map(m => ({ value: m.value, date: m.date })),
+                latest: latest ? { value: latest.value, date: latest.date } : null
+            });
             return latest?.value;
         };
         

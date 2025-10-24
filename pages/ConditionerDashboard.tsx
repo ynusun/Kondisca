@@ -150,8 +150,19 @@ const ConditionerDashboard: React.FC = () => {
         
         // Eğer "Son Değer" seçilmişse, son değerlere göre sırala
         if (leaderboardChangeType === 'latest') {
-            return data
-                .filter(p => p.latestValue !== undefined)
+            console.log('🔍 Latest Value Debug:', {
+                leaderboardMetricId,
+                data: data.map(p => ({ 
+                    name: p.name, 
+                    latestValue: p.latestValue, 
+                    measurements: p.measurements?.filter(m => m.metricId === leaderboardMetricId)?.length || 0
+                }))
+            });
+            
+            const filteredData = data.filter(p => p.latestValue !== undefined);
+            console.log('🔍 Filtered Data:', filteredData.length, 'players with latest values');
+            
+            return filteredData
                 .sort((a, b) => {
                     const valA = a.latestValue || 0;
                     const valB = b.latestValue || 0;

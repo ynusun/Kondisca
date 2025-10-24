@@ -62,7 +62,7 @@ const EventModal: React.FC<{
         );
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!title) {
             alert('Lütfen başlık girin.');
@@ -81,7 +81,13 @@ const EventModal: React.FC<{
             isTeamEvent,
             playerIds: isTeamEvent ? [] : selectedPlayerIds,
         };
-        onSave(eventData as ScheduleEvent);
+        
+        try {
+            await onSave(eventData as ScheduleEvent);
+        } catch (error) {
+            console.error('Event save error:', error);
+            alert('Program kaydedilirken hata oluştu.');
+        }
     };
 
     return (

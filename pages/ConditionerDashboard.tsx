@@ -162,7 +162,16 @@ const ConditionerDashboard: React.FC = () => {
                 selectedMetricId: leaderboardMetricId,
                 selectedMetricName: selectedMetric?.name,
                 playersHaveData: players.some(p => p.measurements.length > 0)
-            }
+            },
+            // Detaylı oyuncu veri analizi
+            detailedPlayerAnalysis: players.map(p => ({
+                name: p.name,
+                id: p.id,
+                measurementsCount: p.measurements.length,
+                measurements: p.measurements,
+                hasAnyData: p.measurements.length > 0,
+                metricIds: [...new Set(p.measurements.map(m => m.metricId))]
+            }))
         });
         
         // Eğer seçilen metric ID ölçümlerde yoksa, doğru metric ID'yi bul
@@ -290,6 +299,13 @@ const ConditionerDashboard: React.FC = () => {
                 })));
                 
                 console.log('💡 Solution: Players need measurements. Visit player profiles to add data.');
+                console.log('🔍 Detailed Analysis:', {
+                    totalPlayers: players.length,
+                    playersWithData: players.filter(p => p.measurements.length > 0).length,
+                    playersWithoutData: players.filter(p => p.measurements.length === 0).length,
+                    allMeasurements: players.flatMap(p => p.measurements),
+                    uniqueMetricIds: [...new Set(players.flatMap(p => p.measurements.map(m => m.metricId)))]
+                });
                 
                 return playersWithoutData;
             }
@@ -460,6 +476,17 @@ const ConditionerDashboard: React.FC = () => {
                                 <p className="text-sm text-yellow-800">
                                     <strong>Çözüm:</strong> Oyuncu profillerini ziyaret edip ölçüm verisi ekleyin. 
                                     Liderlik tablosu otomatik olarak güncellenecektir.
+                                </p>
+                            </div>
+                            <div className="mt-4 p-3 bg-blue-100 border border-blue-400 rounded-lg">
+                                <p className="text-sm text-blue-800">
+                                    <strong>Adım 1:</strong> Oyuncu profilini ziyaret edin (yukarıdaki oyuncu listesinden)
+                                </p>
+                                <p className="text-sm text-blue-800">
+                                    <strong>Adım 2:</strong> "Yeni Ölçüm Ekle" butonuna tıklayın
+                                </p>
+                                <p className="text-sm text-blue-800">
+                                    <strong>Adım 3:</strong> Boy, Kilo, Yağ Oranı gibi ölçümleri girin
                                 </p>
                             </div>
                          </div>

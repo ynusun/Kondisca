@@ -154,6 +154,14 @@ const ConditionerDashboard: React.FC = () => {
                 playersWithMeasurements: players.filter(p => p.measurements.length > 0).length,
                 playersWithoutMeasurements: players.filter(p => p.measurements.length === 0).length,
                 allMeasurementsCount: players.reduce((sum, p) => sum + p.measurements.length, 0)
+            },
+            // Veri kaynağı kontrolü
+            dataSourceCheck: {
+                playersLoaded: players.length > 0,
+                metricsLoaded: metrics.length > 0,
+                selectedMetricId: leaderboardMetricId,
+                selectedMetricName: selectedMetric?.name,
+                playersHaveData: players.some(p => p.measurements.length > 0)
             }
         });
         
@@ -280,6 +288,8 @@ const ConditionerDashboard: React.FC = () => {
                     name: p.name,
                     hasMeasurements: p.measurements.length > 0
                 })));
+                
+                console.log('💡 Solution: Players need measurements. Visit player profiles to add data.');
                 
                 return playersWithoutData;
             }
@@ -445,6 +455,12 @@ const ConditionerDashboard: React.FC = () => {
                                         <span className="text-gray-400">- Veri Yok</span>
                                     </div>
                                 ))}
+                            </div>
+                            <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
+                                <p className="text-sm text-yellow-800">
+                                    <strong>Çözüm:</strong> Oyuncu profillerini ziyaret edip ölçüm verisi ekleyin. 
+                                    Liderlik tablosu otomatik olarak güncellenecektir.
+                                </p>
                             </div>
                          </div>
                     )}

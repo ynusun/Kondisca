@@ -16,8 +16,28 @@ const ConfirmationModal: React.FC<{ title: string, message: string, onConfirm: (
             <h3 className="text-xl font-bold mb-4">{title}</h3>
             <p className="text-text-dark mb-6">{message}</p>
             <div className="flex justify-end space-x-4">
-                <button onClick={onCancel} className="bg-secondary hover:bg-background text-white font-bold py-2 px-4 rounded">İptal</button>
-                <button onClick={onConfirm} className={`text-white font-bold py-2 px-4 rounded ${confirmText === 'Sil' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-dark'}`}>{confirmText}</button>
+                <button 
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onCancel();
+                    }} 
+                    className="bg-secondary hover:bg-background text-white font-bold py-2 px-4 rounded"
+                >
+                    İptal
+                </button>
+                <button 
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onConfirm();
+                    }} 
+                    className={`text-white font-bold py-2 px-4 rounded ${confirmText === 'Sil' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-dark'}`}
+                >
+                    {confirmText}
+                </button>
             </div>
         </div>
     </div>

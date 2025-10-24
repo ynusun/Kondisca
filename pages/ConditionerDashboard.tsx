@@ -116,12 +116,24 @@ const ConditionerDashboard: React.FC = () => {
                 .filter(m => m.metricId === leaderboardMetricId)
                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+            if (relevantMeasurements.length === 0) {
+                return { ...player, improvementPercent: 0, improvementUnit: 0, latestValue: undefined };
+            }
+
+            const latestValue = relevantMeasurements[relevantMeasurements.length - 1].value;
+            
+            // Eğer sadece 1 ölçüm varsa, gelişim hesaplama
             if (relevantMeasurements.length < 2) {
-                return { ...player, improvementPercent: 0, improvementUnit: 0, latestValue: relevantMeasurements[0]?.value };
+                return { 
+                    ...player, 
+                    improvementPercent: 0, 
+                    improvementUnit: 0, 
+                    latestValue: latestValue 
+                };
             }
 
             const firstValue = relevantMeasurements[0].value;
-            const lastValue = relevantMeasurements[relevantMeasurements.length - 1].value;
+            const lastValue = latestValue;
             
             const improvementUnit = lastValue - firstValue;
             const improvementPercent = firstValue === 0 
@@ -136,6 +148,19 @@ const ConditionerDashboard: React.FC = () => {
             };
         });
         
+        // Eğer "Son Değer" seçilmişse, son değerlere göre sırala
+        if (leaderboardChangeType === 'latest') {
+            return data
+                .filter(p => p.latestValue !== undefined)
+                .sort((a, b) => {
+                    const valA = a.latestValue || 0;
+                    const valB = b.latestValue || 0;
+                    return leaderboardSortOrder === 'desc' ? valB - valA : valA - valB;
+                })
+                .slice(0, 5);
+        }
+        
+        // Gelişim verisi için sıralama
         const sortKey = leaderboardChangeType === 'percent' ? 'improvementPercent' : 'improvementUnit';
         
         return data
@@ -202,11 +227,12 @@ const ConditionerDashboard: React.FC = () => {
                             </select>
                              <select 
                                 value={leaderboardChangeType} 
-                                onChange={e => setLeaderboardChangeType(e.target.value as 'percent' | 'unit')}
+                                onChange={e => setLeaderboardChangeType(e.target.value as 'percent' | 'unit' | 'latest')}
                                 className="bg-secondary border border-gray-700 rounded-md p-2 text-sm"
                             >
                                 <option value="percent">Yüzde (%)</option>
                                 <option value="unit">Birim ({selectedMetric?.unit})</option>
+                                <option value="latest">Son Değer</option>
                              </select>
                              <select 
                                 value={leaderboardSortOrder} 
@@ -221,10 +247,21 @@ const ConditionerDashboard: React.FC = () => {
                     {leaderboardData.length > 0 ? (
                         <ul className="space-y-2">
                            {leaderboardData.map((player, index) => {
+                                const isLatest = leaderboardChangeType === 'latest';
                                 const isPercent = leaderboardChangeType === 'percent';
-                                const value = isPercent ? player.improvementPercent : player.improvementUnit;
-                                const isPositive = value > 0;
-                                const displayValue = `${isPositive ? '+' : ''}${value.toFixed(2)}${isPercent ? '%' : ` ${selectedMetric?.unit}`}`;
+                                
+                                let displayValue, displayClass;
+                                
+                                if (isLatest) {
+                                    displayValue = `${player.latestValue?.toFixed(2)} ${selectedMetric?.unit}`;
+                                    displayClass = 'text-primary';
+                                } else {
+                                    const value = isPercent ? player.improvementPercent : player.improvementUnit;
+                                    const isPositive = value > 0;
+                                    displayValue = `${isPositive ? '+' : ''}${value.toFixed(2)}${isPercent ? '%' : ` ${selectedMetric?.unit}`}`;
+                                    displayClass = isPositive ? 'text-green-400' : 'text-red-400';
+                                }
+                                
                                 return (
                                    <li key={player.id} className="flex items-center justify-between p-2 bg-background rounded-md">
                                        <Link to={`/player/${player.id}`} className="flex items-center space-x-3">
@@ -233,17 +270,24 @@ const ConditionerDashboard: React.FC = () => {
                                            <span>{player.name}</span>
                                        </Link>
                                        <div className="text-right">
-                                            <span className={`font-bold text-lg ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                                            <span className={`font-bold text-lg ${displayClass}`}>
                                                {displayValue}
                                             </span>
-                                            <p className="text-xs text-text-dark">Son: {player.latestValue?.toFixed(2)} {selectedMetric?.unit}</p>
+                                            {!isLatest && (
+                                                <p className="text-xs text-text-dark">Son: {player.latestValue?.toFixed(2)} {selectedMetric?.unit}</p>
+                                            )}
                                        </div>
                                    </li>
                                )
                            })}
                         </ul>
                     ) : (
-                         <p className="text-text-dark">Gelişim verisi hesaplamak için yeterli ölçüm yok.</p>
+                         <p className="text-text-dark">
+                            {leaderboardChangeType === 'latest' 
+                                ? 'Bu metrik için ölçüm verisi bulunamadı.' 
+                                : 'Gelişim verisi hesaplamak için yeterli ölçüm yok.'
+                            }
+                         </p>
                     )}
                 </div>
             </div>

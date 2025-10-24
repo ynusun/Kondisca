@@ -663,7 +663,13 @@ const PlayerProfile: React.FC = () => {
         // Metric'leri isimlerine göre bul
         const heightMetric = metrics.find(m => m.name.toLowerCase().includes('boy') || m.name.toLowerCase().includes('height'));
         const weightMetric = metrics.find(m => m.name.toLowerCase().includes('kilo') || m.name.toLowerCase().includes('weight'));
-        const fatMetric = metrics.find(m => m.name.toLowerCase().includes('yağ') || m.name.toLowerCase().includes('fat'));
+        const fatMetric = metrics.find(m => 
+            m.name.toLowerCase().includes('yağ') || 
+            m.name.toLowerCase().includes('fat') || 
+            m.name.toLowerCase().includes('body fat') ||
+            m.name.toLowerCase().includes('bf') ||
+            m.name.toLowerCase().includes('oran')
+        );
         
         // Debug: Bulunan metric'leri console'a yazdır
         console.log('🔍 Metric Debug:', {

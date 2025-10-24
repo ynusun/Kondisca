@@ -114,11 +114,13 @@ const ConditionerDashboard: React.FC = () => {
         console.log('🔍 Leaderboard Debug:', {
             leaderboardMetricId,
             selectedMetric: metrics.find(m => m.id === leaderboardMetricId)?.name,
+            allMetrics: metrics.map(m => ({ id: m.id, name: m.name })),
             players: players.map(p => ({
                 name: p.name,
                 totalMeasurements: p.measurements.length,
                 relevantMeasurements: p.measurements.filter(m => m.metricId === leaderboardMetricId).length,
-                allMetricIds: [...new Set(p.measurements.map(m => m.metricId))]
+                allMetricIds: [...new Set(p.measurements.map(m => m.metricId))],
+                measurements: p.measurements.map(m => ({ metricId: m.metricId, value: m.value, date: m.date }))
             }))
         });
         
@@ -322,12 +324,20 @@ const ConditionerDashboard: React.FC = () => {
                            })}
                         </ul>
                     ) : (
-                         <p className="text-text-dark">
-                            {leaderboardChangeType === 'latest' 
-                                ? 'Bu metrik için ölçüm verisi bulunamadı.' 
-                                : 'Gelişim verisi hesaplamak için yeterli ölçüm yok.'
-                            }
-                         </p>
+                         <div className="text-center p-4">
+                            <p className="text-text-dark mb-2">
+                                {leaderboardChangeType === 'latest' 
+                                    ? 'Bu metrik için ölçüm verisi bulunamadı.' 
+                                    : 'Gelişim verisi hesaplamak için yeterli ölçüm yok.'
+                                }
+                            </p>
+                            <p className="text-xs text-gray-500">
+                                Seçilen metrik: {selectedMetric?.name || 'Bilinmiyor'} ({leaderboardMetricId})
+                            </p>
+                            <p className="text-xs text-gray-500">
+                                Toplam oyuncu: {players.length}, Toplam metrik: {metrics.length}
+                            </p>
+                         </div>
                     )}
                 </div>
             </div>

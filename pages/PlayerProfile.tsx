@@ -702,7 +702,16 @@ const PlayerProfile: React.FC = () => {
             })),
             fatMeasurements: player.measurements.filter(m => 
                 fatMetric && m.metricId === fatMetric.id
-            ).map(m => ({ value: m.value, date: m.date }))
+            ).map(m => ({ value: m.value, date: m.date })),
+            // Derin analiz
+            fatMetricSearch: {
+                exactMatch: metrics.find(m => m.name.toLowerCase() === 'yağ oranı'),
+                partialMatch: metrics.filter(m => m.name.toLowerCase().includes('yağ')),
+                allFatRelated: metrics.filter(m => {
+                    const name = m.name.toLowerCase();
+                    return name.includes('yağ') || name.includes('fat') || name.includes('oran');
+                })
+            }
         });
         
         const findLast = (metricId: string) => {
@@ -727,6 +736,26 @@ const PlayerProfile: React.FC = () => {
                 age--;
             }
         }
+
+        // Manuel test: Tüm metric'leri dene
+        const testAllMetrics = () => {
+            const testResults = {};
+            metrics.forEach(metric => {
+                const measurements = player.measurements.filter(m => m.metricId === metric.id);
+                if (measurements.length > 0) {
+                    const sorted = measurements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                    testResults[metric.name] = {
+                        id: metric.id,
+                        latestValue: sorted[0].value,
+                        totalMeasurements: measurements.length
+                    };
+                }
+            });
+            console.log('🧪 All Metrics Test:', testResults);
+            return testResults;
+        };
+        
+        testAllMetrics();
 
         const result = {
             height: heightMetric ? findLast(heightMetric.id) : undefined,

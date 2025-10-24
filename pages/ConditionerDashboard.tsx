@@ -86,12 +86,26 @@ const ConditionerDashboard: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [playerData, metricsData, scheduleData] = await Promise.all([
+                const [playersData, metricsData, scheduleData] = await Promise.all([
                     api.getPlayers(),
                     api.getMetrics(),
                     api.getScheduleEvents()
                 ]);
-                setPlayers(playerData);
+                
+                // Her oyuncu için detaylı veri al
+                const playersWithDetails = await Promise.all(
+                    playersData.map(async (player) => {
+                        try {
+                            const playerDetails = await api.getPlayerDetails(player.id);
+                            return playerDetails || player;
+                        } catch (error) {
+                            console.error(`Failed to fetch details for player ${player.name}:`, error);
+                            return player;
+                        }
+                    })
+                );
+                
+                setPlayers(playersWithDetails);
                 const activeMetrics = metricsData.filter(m => m.isActive);
                 setMetrics(activeMetrics);
                 setSchedule(scheduleData);

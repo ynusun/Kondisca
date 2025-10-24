@@ -663,18 +663,31 @@ const PlayerProfile: React.FC = () => {
         // Metric'leri isimlerine göre bul
         const heightMetric = metrics.find(m => m.name.toLowerCase().includes('boy') || m.name.toLowerCase().includes('height'));
         const weightMetric = metrics.find(m => m.name.toLowerCase().includes('kilo') || m.name.toLowerCase().includes('weight'));
-        const fatMetric = metrics.find(m => {
+        // Önce tam eşleşme ara
+        let fatMetric = metrics.find(m => {
             const name = m.name.toLowerCase();
-            return name.includes('yağ') || 
-                   name.includes('fat') || 
-                   name.includes('body fat') ||
-                   name.includes('bf') ||
-                   name.includes('oran') ||
-                   name.includes('bodyfat') ||
-                   name.includes('yağ oranı') ||
-                   name.includes('fat percentage') ||
-                   name.includes('body fat percentage');
+            return name === 'yağ oranı' || 
+                   name === 'fat percentage' || 
+                   name === 'body fat percentage' ||
+                   name === 'yağ' ||
+                   name === 'fat';
         });
+        
+        // Tam eşleşme bulunamazsa kısmi eşleşme ara
+        if (!fatMetric) {
+            fatMetric = metrics.find(m => {
+                const name = m.name.toLowerCase();
+                return name.includes('yağ') || 
+                       name.includes('fat') || 
+                       name.includes('body fat') ||
+                       name.includes('bf') ||
+                       name.includes('oran') ||
+                       name.includes('bodyfat') ||
+                       name.includes('yağ oranı') ||
+                       name.includes('fat percentage') ||
+                       name.includes('body fat percentage');
+            });
+        }
         
         // Debug: Bulunan metric'leri console'a yazdır
         console.log('🔍 Metric Debug:', {
@@ -723,9 +736,24 @@ const PlayerProfile: React.FC = () => {
         };
         
         console.log('📊 Latest Stats Result:', {
-            height: { metric: heightMetric?.name, value: result.height },
-            weight: { metric: weightMetric?.name, value: result.weight },
-            fat: { metric: fatMetric?.name, value: result.fat },
+            height: { 
+                metric: heightMetric?.name, 
+                metricId: heightMetric?.id,
+                value: result.height,
+                found: !!heightMetric
+            },
+            weight: { 
+                metric: weightMetric?.name, 
+                metricId: weightMetric?.id,
+                value: result.weight,
+                found: !!weightMetric
+            },
+            fat: { 
+                metric: fatMetric?.name, 
+                metricId: fatMetric?.id,
+                value: result.fat,
+                found: !!fatMetric
+            },
             age: result.age
         });
         return result;

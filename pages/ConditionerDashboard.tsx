@@ -180,15 +180,10 @@ const ConditionerDashboard: React.FC = () => {
             const filteredData = data.filter(p => p.latestValue !== undefined);
             console.log('🔍 Filtered Data:', filteredData.length, 'players with latest values');
             
-            // Eğer hiç veri yoksa, tüm oyuncuları göster (son değer olmadan)
+            // Eğer hiç veri yoksa, boş liste döndür
             if (filteredData.length === 0) {
-                console.log('⚠️ No data found for selected metric, showing all players');
-                return players.slice(0, 5).map(p => ({
-                    ...p,
-                    latestValue: undefined,
-                    improvementPercent: 0,
-                    improvementUnit: 0
-                }));
+                console.log('⚠️ No data found for selected metric');
+                return [];
             }
             
             return filteredData
@@ -293,8 +288,13 @@ const ConditionerDashboard: React.FC = () => {
                                 let displayValue, displayClass;
                                 
                                 if (isLatest) {
-                                    displayValue = `${player.latestValue?.toFixed(2)} ${selectedMetric?.unit}`;
-                                    displayClass = 'text-primary';
+                                    if (player.latestValue !== undefined && player.latestValue !== null) {
+                                        displayValue = `${player.latestValue.toFixed(2)} ${selectedMetric?.unit || ''}`;
+                                        displayClass = 'text-primary';
+                                    } else {
+                                        displayValue = 'Veri Yok';
+                                        displayClass = 'text-gray-400';
+                                    }
                                 } else {
                                     const value = isPercent ? player.improvementPercent : player.improvementUnit;
                                     const isPositive = value > 0;

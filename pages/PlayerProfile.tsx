@@ -208,9 +208,25 @@ const AddMeasurementModal: React.FC<{
     onSave: (p: Player) => void;
 }> = ({ player, metrics, onClose, onSave }) => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [values, setValues] = useState<Record<string, string>>({});
-
+    
+    // En son değerleri bul ve default olarak ayarla
+    const getLastValue = (metricId: string) => {
+        const measurements = player.measurements
+            .filter(m => m.metricId === metricId)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return measurements[0]?.value?.toString() || '';
+    };
+    
     const manualMetrics = metrics.filter(m => m.inputType === MetricInputType.Manual && m.isActive);
+    
+    // Default değerleri ayarla
+    const [values, setValues] = useState<Record<string, string>>(() => {
+        const initialValues: Record<string, string> = {};
+        manualMetrics.forEach(metric => {
+            initialValues[metric.id] = getLastValue(metric.id);
+        });
+        return initialValues;
+    });
 
     const handleValueChange = (metricId: string, value: string) => {
         setValues(prev => ({ ...prev, [metricId]: value }));
@@ -657,9 +673,13 @@ const PlayerProfile: React.FC = () => {
             fatMetric: fatMetric ? { id: fatMetric.id, name: fatMetric.name } : null,
         });
         
-        const findLast = (metricId: string) => player.measurements
-            .filter(m => m.metricId === metricId)
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.value;
+        const findLast = (metricId: string) => {
+            const measurements = player.measurements.filter(m => m.metricId === metricId);
+            const sorted = measurements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            const latest = sorted[0];
+            console.log(`🔍 ${metricId} measurements:`, measurements.length, 'latest:', latest);
+            return latest?.value;
+        };
         
         let age;
         if (player.birthDate) {
@@ -672,12 +692,15 @@ const PlayerProfile: React.FC = () => {
             }
         }
 
-        return {
+        const result = {
             height: heightMetric ? findLast(heightMetric.id) : undefined,
             weight: weightMetric ? findLast(weightMetric.id) : undefined,
             fat: fatMetric ? findLast(fatMetric.id) : undefined,
             age: age,
         };
+        
+        console.log('📊 Latest Stats Result:', result);
+        return result;
     }, [player, metrics]);
     
     const chartData = useMemo(() => {

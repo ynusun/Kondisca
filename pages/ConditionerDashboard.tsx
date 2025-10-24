@@ -113,10 +113,12 @@ const ConditionerDashboard: React.FC = () => {
     const leaderboardData = useMemo(() => {
         console.log('🔍 Leaderboard Debug:', {
             leaderboardMetricId,
+            selectedMetric: metrics.find(m => m.id === leaderboardMetricId)?.name,
             players: players.map(p => ({
                 name: p.name,
                 totalMeasurements: p.measurements.length,
-                relevantMeasurements: p.measurements.filter(m => m.metricId === leaderboardMetricId).length
+                relevantMeasurements: p.measurements.filter(m => m.metricId === leaderboardMetricId).length,
+                allMetricIds: [...new Set(p.measurements.map(m => m.metricId))]
             }))
         });
         
@@ -177,6 +179,17 @@ const ConditionerDashboard: React.FC = () => {
             
             const filteredData = data.filter(p => p.latestValue !== undefined);
             console.log('🔍 Filtered Data:', filteredData.length, 'players with latest values');
+            
+            // Eğer hiç veri yoksa, tüm oyuncuları göster (son değer olmadan)
+            if (filteredData.length === 0) {
+                console.log('⚠️ No data found for selected metric, showing all players');
+                return players.slice(0, 5).map(p => ({
+                    ...p,
+                    latestValue: undefined,
+                    improvementPercent: 0,
+                    improvementUnit: 0
+                }));
+            }
             
             return filteredData
                 .sort((a, b) => {

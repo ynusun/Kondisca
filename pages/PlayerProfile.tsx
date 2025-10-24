@@ -663,13 +663,18 @@ const PlayerProfile: React.FC = () => {
         // Metric'leri isimlerine göre bul
         const heightMetric = metrics.find(m => m.name.toLowerCase().includes('boy') || m.name.toLowerCase().includes('height'));
         const weightMetric = metrics.find(m => m.name.toLowerCase().includes('kilo') || m.name.toLowerCase().includes('weight'));
-        const fatMetric = metrics.find(m => 
-            m.name.toLowerCase().includes('yağ') || 
-            m.name.toLowerCase().includes('fat') || 
-            m.name.toLowerCase().includes('body fat') ||
-            m.name.toLowerCase().includes('bf') ||
-            m.name.toLowerCase().includes('oran')
-        );
+        const fatMetric = metrics.find(m => {
+            const name = m.name.toLowerCase();
+            return name.includes('yağ') || 
+                   name.includes('fat') || 
+                   name.includes('body fat') ||
+                   name.includes('bf') ||
+                   name.includes('oran') ||
+                   name.includes('bodyfat') ||
+                   name.includes('yağ oranı') ||
+                   name.includes('fat percentage') ||
+                   name.includes('body fat percentage');
+        });
         
         // Debug: Bulunan metric'leri console'a yazdır
         console.log('🔍 Metric Debug:', {
@@ -681,7 +686,10 @@ const PlayerProfile: React.FC = () => {
                 metricId: m.metricId, 
                 value: m.value, 
                 date: m.date 
-            }))
+            })),
+            fatMeasurements: player.measurements.filter(m => 
+                fatMetric && m.metricId === fatMetric.id
+            ).map(m => ({ value: m.value, date: m.date }))
         });
         
         const findLast = (metricId: string) => {

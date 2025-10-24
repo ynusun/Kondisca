@@ -147,6 +147,13 @@ const ConditionerDashboard: React.FC = () => {
                 allMetricIds: [...new Set(players.flatMap(p => p.measurements.map(m => m.metricId)))],
                 metricIdInMeasurements: players.some(p => p.measurements.some(m => m.metricId === leaderboardMetricId)),
                 metricIdInMetrics: metrics.some(m => m.id === leaderboardMetricId)
+            },
+            // Oyuncu veri durumu
+            playerDataStatus: {
+                totalPlayers: players.length,
+                playersWithMeasurements: players.filter(p => p.measurements.length > 0).length,
+                playersWithoutMeasurements: players.filter(p => p.measurements.length === 0).length,
+                allMeasurementsCount: players.reduce((sum, p) => sum + p.measurements.length, 0)
             }
         });
         
@@ -254,12 +261,19 @@ const ConditionerDashboard: React.FC = () => {
                 })));
                 
                 // Veri olmayan oyuncuları göster
-                return players.slice(0, 5).map(p => ({
+                const playersWithoutData = players.slice(0, 5).map(p => ({
                     ...p,
                     latestValue: undefined,
                     improvementPercent: 0,
                     improvementUnit: 0
                 }));
+                
+                console.log('📊 Showing players without data:', playersWithoutData.map(p => ({
+                    name: p.name,
+                    hasMeasurements: p.measurements.length > 0
+                })));
+                
+                return playersWithoutData;
             }
             
             return filteredData
@@ -412,6 +426,15 @@ const ConditionerDashboard: React.FC = () => {
                             <p className="text-xs text-red-500 mt-2">
                                 💡 Bu oyuncular için henüz ölçüm verisi girilmemiş. Ölçüm eklemek için oyuncu profilini ziyaret edin.
                             </p>
+                            <div className="mt-4 space-y-2">
+                                {players.slice(0, 3).map(player => (
+                                    <div key={player.id} className="flex items-center justify-center space-x-2 text-sm">
+                                        <img src={player.avatarUrl} alt={player.name} className="w-6 h-6 rounded-full" />
+                                        <span className="text-text-dark">{player.name}</span>
+                                        <span className="text-gray-400">- Veri Yok</span>
+                                    </div>
+                                ))}
+                            </div>
                          </div>
                     )}
                 </div>

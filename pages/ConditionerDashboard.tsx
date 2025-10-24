@@ -192,6 +192,14 @@ const ConditionerDashboard: React.FC = () => {
                     selected: leaderboardMetricId,
                     available: [...new Set(player.measurements.map(m => m.metricId))],
                     match: player.measurements.some(m => m.metricId === leaderboardMetricId)
+                },
+                // Oyuncu veri durumu
+                playerData: {
+                    id: player.id,
+                    name: player.name,
+                    hasMeasurements: player.measurements.length > 0,
+                    measurementCount: player.measurements.length,
+                    allMetricIds: [...new Set(player.measurements.map(m => m.metricId))]
                 }
             });
 
@@ -403,6 +411,9 @@ const ConditionerDashboard: React.FC = () => {
                                             </span>
                                             {!isLatest && player.latestValue !== undefined && (
                                                 <p className="text-xs text-text-dark">Son: {player.latestValue?.toFixed(2)} {selectedMetric?.unit}</p>
+                                            )}
+                                            {isLatest && player.latestValue === undefined && (
+                                                <p className="text-xs text-gray-400">Ölçüm eklemek için tıklayın</p>
                                             )}
                                        </div>
                                    </li>

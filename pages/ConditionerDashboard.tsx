@@ -134,7 +134,13 @@ const ConditionerDashboard: React.FC = () => {
                 relevantMeasurements: p.measurements.filter(m => m.metricId === leaderboardMetricId).length,
                 allMetricIds: [...new Set(p.measurements.map(m => m.metricId))],
                 measurements: p.measurements.map(m => ({ metricId: m.metricId, value: m.value, date: m.date }))
-            }))
+            })),
+            // Metric ID eşleştirme kontrolü
+            metricIdMatch: {
+                selected: leaderboardMetricId,
+                available: [...new Set(players.flatMap(p => p.measurements.map(m => m.metricId)))],
+                match: players.some(p => p.measurements.some(m => m.metricId === leaderboardMetricId))
+            }
         });
         
         const data = players.map(player => {
@@ -146,14 +152,17 @@ const ConditionerDashboard: React.FC = () => {
                 metricId: leaderboardMetricId,
                 total: player.measurements.length,
                 relevant: relevantMeasurements.length,
-                measurements: relevantMeasurements.map(m => ({ value: m.value, date: m.date }))
+                measurements: relevantMeasurements.map(m => ({ value: m.value, date: m.date })),
+                allMeasurements: player.measurements.map(m => ({ metricId: m.metricId, value: m.value, date: m.date }))
             });
 
             if (relevantMeasurements.length === 0) {
+                console.log(`⚠️ ${player.name} has no measurements for metric ${leaderboardMetricId}`);
                 return { ...player, improvementPercent: 0, improvementUnit: 0, latestValue: undefined };
             }
 
             const latestValue = relevantMeasurements[relevantMeasurements.length - 1].value;
+            console.log(`✅ ${player.name} latest value: ${latestValue}`);
             
             // Eğer sadece 1 ölçüm varsa, gelişim hesaplama
             if (relevantMeasurements.length < 2) {
@@ -193,11 +202,24 @@ const ConditionerDashboard: React.FC = () => {
             });
             
             const filteredData = data.filter(p => p.latestValue !== undefined);
-            console.log('🔍 Filtered Data:', filteredData.length, 'players with latest values');
+            console.log('🔍 Filtered Data:', {
+                total: data.length,
+                withLatestValue: filteredData.length,
+                players: data.map(p => ({
+                    name: p.name,
+                    hasLatestValue: p.latestValue !== undefined,
+                    latestValue: p.latestValue
+                }))
+            });
             
             // Eğer hiç veri yoksa, boş liste döndür
             if (filteredData.length === 0) {
                 console.log('⚠️ No data found for selected metric');
+                console.log('🔍 All players data:', data.map(p => ({
+                    name: p.name,
+                    latestValue: p.latestValue,
+                    hasMeasurements: p.measurements.length > 0
+                })));
                 return [];
             }
             

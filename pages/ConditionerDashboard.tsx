@@ -140,12 +140,38 @@ const ConditionerDashboard: React.FC = () => {
                 selected: leaderboardMetricId,
                 available: [...new Set(players.flatMap(p => p.measurements.map(m => m.metricId)))],
                 match: players.some(p => p.measurements.some(m => m.metricId === leaderboardMetricId))
+            },
+            // Detaylı metric ID analizi
+            metricIdAnalysis: {
+                selectedMetricId: leaderboardMetricId,
+                allMetricIds: [...new Set(players.flatMap(p => p.measurements.map(m => m.metricId)))],
+                metricIdInMeasurements: players.some(p => p.measurements.some(m => m.metricId === leaderboardMetricId)),
+                metricIdInMetrics: metrics.some(m => m.id === leaderboardMetricId)
             }
         });
         
+        // Eğer seçilen metric ID ölçümlerde yoksa, doğru metric ID'yi bul
+        let actualMetricId = leaderboardMetricId;
+        const hasMeasurements = players.some(p => p.measurements.some(m => m.metricId === leaderboardMetricId));
+        
+        if (!hasMeasurements) {
+            console.log('⚠️ Selected metric ID not found in measurements, trying to find correct one');
+            const availableMetricIds = [...new Set(players.flatMap(p => p.measurements.map(m => m.metricId)))];
+            console.log('Available metric IDs in measurements:', availableMetricIds);
+            
+            // Eğer seçilen metric'in adına göre doğru ID'yi bul
+            if (selectedMetric) {
+                const correctMetric = metrics.find(m => m.name === selectedMetric.name && availableMetricIds.includes(m.id));
+                if (correctMetric) {
+                    actualMetricId = correctMetric.id;
+                    console.log(`✅ Found correct metric ID: ${actualMetricId} for metric: ${selectedMetric.name}`);
+                }
+            }
+        }
+        
         const data = players.map(player => {
             const relevantMeasurements = player.measurements
-                .filter(m => m.metricId === leaderboardMetricId)
+                .filter(m => m.metricId === actualMetricId)
                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
             console.log(`🔍 ${player.name} measurements:`, {
@@ -153,7 +179,13 @@ const ConditionerDashboard: React.FC = () => {
                 total: player.measurements.length,
                 relevant: relevantMeasurements.length,
                 measurements: relevantMeasurements.map(m => ({ value: m.value, date: m.date })),
-                allMeasurements: player.measurements.map(m => ({ metricId: m.metricId, value: m.value, date: m.date }))
+                allMeasurements: player.measurements.map(m => ({ metricId: m.metricId, value: m.value, date: m.date })),
+                // Metric ID eşleştirme kontrolü
+                metricIdMatch: {
+                    selected: leaderboardMetricId,
+                    available: [...new Set(player.measurements.map(m => m.metricId))],
+                    match: player.measurements.some(m => m.metricId === leaderboardMetricId)
+                }
             });
 
             if (relevantMeasurements.length === 0) {
